@@ -1,4 +1,9 @@
 
+import com.opencsv.CSVWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,32 +18,43 @@ public class SunKnee {
 
     private static final Logger LOG = Logger.getLogger(SunKnee.class.getName());
 
-    public static void main(String[] args) {
-        double qMean = 0.0;
-        int nSamples = 10000;
-        for (int j = 0; j < nSamples; j++) {
-            int N = 10;
-            final User.DummyUser user = new User.DummyUser();
-            List<Item.DummyItem> unsortedItems = new ArrayList<>(N);
-            for (int i = 0; i < N; i++) {
-                Item.DummyItem item = new Item.DummyItem(i);
-                unsortedItems.add(item);
-                user.addItem(item);
+    public static void main(String[] args) throws IOException {
+        String outputPath = "/tmp/";
+        Writer writer = new FileWriter(new File(outputPath + File.separator + "data.csv"));
+        CSVWriter csvWriter = new CSVWriter(writer);
+        String[] header = new String[] {"N", "q(N)", "min(q(N))", "max(q(N))"};
+        csvWriter.writeNext(header);
+        int nSamples = 1000;
+        int minN = 2;
+        int maxN = 200;
+        for (int N = minN; N < maxN; N++) {
+            LOG.log(Level.INFO, "** N : {0}", N);
+            double qMean = 0.0;
+            int minQ = N-1;
+            int maxQ = N * (N - 1) / 2;
+            for (int j = 0; j < nSamples; j++) {
+                final User.DummyUser user = new User.DummyUser();
+                List<Item.DummyItem> unsortedItems = new ArrayList<>(N);
+                for (int i = 0; i < N; i++) {
+                    Item.DummyItem item = new Item.DummyItem(i);
+                    unsortedItems.add(item);
+                    user.addItem(item);
+                }
+                Collections.shuffle(unsortedItems);
+                MyComparator<Item.DummyItem> comparator = new MyComparator<>(user);
+                Set<Item.DummyItem> sortedItems = new TreeSet<>(comparator);
+                Iterator<Item.DummyItem> iterator = unsortedItems.iterator();
+                while (iterator.hasNext()) {
+                    Item.DummyItem item = iterator.next();
+                    sortedItems.add(item);
+                }
+                qMean += (double) comparator.getQ() - 1;
             }
-            Collections.shuffle(unsortedItems);
-            MyComparator<Item.DummyItem> comparator = new MyComparator<>(user);
-            Set<Item.DummyItem> sortedItems = new TreeSet<>(comparator);
-            Iterator<Item.DummyItem> iterator = unsortedItems.iterator();
-            while (iterator.hasNext()) {
-                Item.DummyItem item = iterator.next();
-                sortedItems.add(item);
-            }
-            LOG.log(Level.INFO, String.format("N=%d, min(q(N))=%d, q=%d, max(q(N))=%d", N, N - 1, comparator.getQ(), N * (N - 1) / 2));
-            LOG.log(Level.INFO, sortedItems.toString());
-            qMean += (double) comparator.getQ();
+            qMean /= nSamples;
+            String[] values = new String[] {Integer.toString(N), Double.toString(qMean), Integer.toString(minQ), Integer.toString(maxQ)};
+            csvWriter.writeNext(values);
         }
-        qMean /= nSamples;
-        LOG.log(Level.INFO, String.format("qMean=%f, nSamples=%d", qMean, nSamples));
+        writer.close();
     }
 
     private static class MyComparator<T extends Item> implements Comparator<T> {
