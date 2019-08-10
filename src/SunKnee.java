@@ -41,61 +41,15 @@ public class SunKnee {
                     user.addItem(item);
                 }
                 Collections.shuffle(unsortedItems);
-                MyComparator<Item.DummyItem> comparator = new MyComparator<>(user);
-                Set<Item.DummyItem> sortedItems = new TreeSet<>(comparator);
-                Iterator<Item.DummyItem> iterator = unsortedItems.iterator();
-                while (iterator.hasNext()) {
-                    Item.DummyItem item = iterator.next();
-                    sortedItems.add(item);
-                }
-                qMean += (double) comparator.getQ() - 1;
+                Solver<Item.DummyItem> solver = new Solver.FromTreeSet<>();
+                Item.DummyItem[] sortedItems = new Item.DummyItem[N];
+                solver.sort(user, unsortedItems, sortedItems);
+                qMean += (double) solver.getOrder();
             }
             qMean /= nSamples;
             String[] values = new String[] {Integer.toString(N), Double.toString(qMean), Integer.toString(minQ), Integer.toString(maxQ)};
             csvWriter.writeNext(values);
         }
         writer.close();
-    }
-
-    private static class MyComparator<T extends Item> implements Comparator<T> {
-
-        private final User user_;
-        private int q_;
-
-        public MyComparator(User user) {
-            user_ = user;
-            q_ = 0;
-        }
-
-        public int getQ() {
-            return q_;
-        }
-
-        @Override
-        public int compare(T t, T t1) {
-            q_++;
-            return (user_.compare(t, t1));
-        }
-
-    }
-
-    public static class Node<T extends Item> {
-
-        T item_;
-        Node left_;
-        Node right_;
-
-        Node(T item) {
-            item_ = item;
-            left_ = null;
-            right_ = null;
-        }
-    }
-
-    public static class BinaryTree {
-
-        Node root;
-
-        // ...
     }
 }
