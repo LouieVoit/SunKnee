@@ -25,24 +25,36 @@ public class SolverTest {
 
     @BeforeClass
     public static void setUp() {
-        OUTPUT_PATH = System.getProperty("user.dir") + File.separator + "DummySolverTest";
+        OUTPUT_PATH = System.getProperty("user.dir") + File.separator + "SolverTest";
         (new File(OUTPUT_PATH)).mkdirs();
     }
-
+    
+    
     @Test
-    public void statisticalStudies() throws IOException {
-        int numberOfSamples = 1000;
-        try (Writer writerForStatistics = new FileWriter(new File(OUTPUT_PATH + File.separator + "data_numberOfSamples_" + numberOfSamples + ".csv"))) {
+    public void runStatisticalStudies() throws IOException {
+        Solver<Item.DummyItem> solver = new Solver.DummySolver<>();
+        int numberOfSamples = 100000;
+        int minimumNumberOfItems = 100;
+        int maximumNumberOfItems = 101;
+        String outputPath = OUTPUT_PATH + File.separator + "DummySolverTest";
+        (new File(outputPath)).mkdirs();
+        runStatisticalStudies_(solver, numberOfSamples, minimumNumberOfItems, maximumNumberOfItems, outputPath);
+        solver = new Solver.FromTreeSet<>();
+        outputPath = OUTPUT_PATH + File.separator + "FromTreeSetSolverTest";
+        (new File(outputPath)).mkdirs();
+        runStatisticalStudies_(solver, numberOfSamples, minimumNumberOfItems, maximumNumberOfItems, outputPath);
+    }
+    
+    private void runStatisticalStudies_(Solver solver, int numberOfSamples, int minimumNumberOfItems, int maximumNumberOfItems, String outputPath) throws IOException {
+        try (Writer writerForStatistics = new FileWriter(new File(outputPath + File.separator + "data_numberOfSamples_" + numberOfSamples + ".csv"))) {
             CSVWriter csvWriterForStatistics = new CSVWriter(writerForStatistics);
             csvWriterForStatistics.writeNext(new String[]{"N", "average order", "minimum order", "maximum order"});
-            int minimumNumberOfItems = 2;
-            int maximumNumberOfItems = 100;
             for (int numberOfItems = minimumNumberOfItems; numberOfItems < maximumNumberOfItems; numberOfItems++) {
                 LOG.log(Level.INFO, "** number of items : {0}", numberOfItems);
                 int minimumOrder = numberOfItems - 1;
                 int maximumOrder = numberOfItems * (numberOfItems - 1) / 2;
                 double averageOrder;
-                try (Writer writer = new FileWriter(new File(OUTPUT_PATH + File.separator + "data_numberOfItems_" + numberOfItems + ".csv"))) {
+                try (Writer writer = new FileWriter(new File(outputPath + File.separator + "data_numberOfItems_" + numberOfItems + ".csv"))) {
                     CSVWriter csvWriter = new CSVWriter(writer);
                     csvWriter.writeNext(new String[]{"sample index", "order"});
                     averageOrder = 0.0;
@@ -57,8 +69,6 @@ public class SolverTest {
                         userItems.forEach((userItem) -> {
                             user.addItem(userItem);
                         });
-                        Solver<Item.DummyItem> solver = new Solver.FromTreeSet<>();
-//                        Solver<Item.DummyItem> solver = new Solver.DummySolver<>();
                         Item.DummyItem[] sortedItems = new Item.DummyItem[numberOfItems];
                         Item.DummyItem[] unsortedItems = user.getItems().toArray(new Item.DummyItem[numberOfItems]);
                         solver.sort(user, unsortedItems, sortedItems);
