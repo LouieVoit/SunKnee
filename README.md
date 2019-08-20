@@ -23,7 +23,7 @@ For the time being, two solvers exist which mainly differ from the insertion alg
 * One use a very basic and naive algorithm : starting from the bottom of the sorted items array (i.e. its first item), an unsorted item is compared to sorted items until its right place is found;
 * The second one is based on insertion in a [self-balancing binary tree](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree);
 
-Obviously, the solver order `q`, which we aim to minimise, is tighlty linked to the insertion [algorithm complexity](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Algorithmic%20Complexity/complexity.html). Thus, the second solver (complexity `O(log(N))`) performs much better than the first one (complexity `O(N^2`). To illustrate this, a small statistical studies can be run in the test class [SolverTest](test/SolverTest.java) over `1e5` samples and a number of items `N in [2,200]`. For `100` items, the following histograms show the various values the solver order `q` can take and their frequencies at which they occur (q being in `[99,4950]`).
+Obviously, the solver order `q`, which we aim to minimise, is tighlty linked to the insertion [algorithm complexity](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Algorithmic%20Complexity/complexity.html). Thus, the second solver (complexity `O(log(N))`) performs much better than the first one (complexity `O(N^2`). To illustrate this, a small statistical studies can be run in the test class [SolverTest](test/SolverTest.java) over `1e5` samples and a number of items `N in [2,200]`. For `100` items, the following histograms show the various values the solver order `q` can take and their frequencies at which they occur (q being in `[99,4950]`). The first histogram corresponds to the _naive_ solver and the second histogram for the binary tree based solver.
 
 
 ![Histogram with the _naive_ insertion algorithm](resources/histogram_dummysolver_100items.png)
@@ -32,4 +32,4 @@ Obviously, the solver order `q`, which we aim to minimise, is tighlty linked to 
 ![Histogram with the binary tree based insertion algorithm](resources/histogram_fromtreesetsolver_100items.png)
 
 
-The average order _(i.e. the number of questions the user have to answer to sort its items)_ for the _naive_ solver is `2475.3` while, for the binary tree based solver, the average order is `541.4`.
+As expected, the second solver performs much better than the _naive_ solver. The average order _(i.e. the number of questions the user have to answer to sort its items)_ for the _naive_ solver is `2475.3` while, for the binary tree based solver, the average order is `541.4`.
