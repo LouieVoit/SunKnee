@@ -1,4 +1,9 @@
+package kernel;
 
+
+import kernel.User;
+import kernel.Item;
+import kernel.Solver;
 import com.opencsv.CSVWriter;
 import java.io.File;
 import java.io.FileWriter;
